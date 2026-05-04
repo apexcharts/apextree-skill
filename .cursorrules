@@ -1,0 +1,183 @@
+# ApexTree — AI Coding Rules
+
+You are working with ApexTree, a JavaScript organizational / hierarchical tree-chart library built on SVG.
+Documentation: https://apexcharts.com/docs/apextree/
+NPM: apextree
+GitHub: https://github.com/apexcharts/apextree
+
+## Critical Rules
+
+1. **Data goes to `render(rootNode)`, not the constructor.** Constructor takes `(element, options)`.
+2. **Every node has `id`, `name`, `children`.** Leaves have `children: []` (empty array, not omitted).
+3. **`id` must be unique across the entire tree.**
+4. **`render()` returns a `Graph`.** Keep it — it exposes `collapse`, `expand`, search, selection, layout APIs.
+5. **`enableSelection` is `'single' | 'multi' | false`**, not a boolean.
+6. **Selection callbacks are on the `Graph`**: `graph.onSelectionChange(fn)`, not in options.
+7. **Use `contentKey: 'data'` for the built-in org-card template** — don't hand-roll the avatar / title / subtitle layout.
+8. **`direction` is `'top' | 'bottom' | 'left' | 'right'`.**
+9. **Call `destroy()`** before unmounting in React / Vue / Angular.
+10. **Set license once** with `ApexTree.setLicense('KEY')` at app startup.
+
+---
+
+## Data Format
+
+```ts
+interface NestedNode<T = undefined> {
+  id: string;                       // REQUIRED, globally unique
+  name: string;                     // REQUIRED, label when contentKey === 'name'
+  children: NestedNode<T>[];        // REQUIRED, [] for leaves
+  data?: T;                         // payload used when contentKey === 'data'
+  options?: Partial<NodeOptions & FontOptions & TooltipOptions>;
+}
+```
+
+```js
+import { ApexTree } from 'apextree';
+
+const data = {
+  id: '1', name: 'CEO',
+  children: [
+    { id: '2', name: 'CTO', children: [
+      { id: '4', name: 'Eng Lead', children: [] },
+    ]},
+    { id: '3', name: 'CFO', children: [] },
+  ],
+};
+
+const tree = new ApexTree(document.getElementById('chart'), {
+  width: 800, height: 600,
+  nodeWidth: 120, nodeHeight: 40,
+  childrenSpacing: 70, siblingSpacing: 30,
+  direction: 'top',
+});
+const graph = tree.render(data);
+```
+
+### Org-card mode
+
+```js
+new ApexTree(el, {
+  contentKey: 'data',
+  nodeWidth: 220, nodeHeight: 80,
+}).render({
+  id: 'ceo', name: 'Alice',
+  data: {
+    name: 'Alice Johnson',
+    title: 'CEO',
+    subtitle: 'Executive',
+    imageURL: 'https://...',
+    accentColor: '#6366f1',
+    badge: { text: 'Active', color: '#EEF2FF' },
+  },
+  children: [],
+});
+```
+
+---
+
+## Lifecycle
+
+```js
+import { ApexTree } from 'apextree';
+ApexTree.setLicense('KEY');                    // once at app startup
+const tree  = new ApexTree(el, options);
+const graph = tree.render(rootNode);           // REQUIRED, keep the Graph
+graph.changeLayout('left');
+graph.collapse('node-2');
+graph.construct(newData);                      // replace data, re-render
+tree.destroy();                                // before unmount
+```
+
+---
+
+## API
+
+### Tree
+
+| Method | Description |
+|---|---|
+| `new ApexTree(el, opts?)` | Construct. |
+| `render(root)` | Paint. Returns `Graph`. Required. |
+| `destroy()` | Tear down. |
+| `ApexTree.setLicense(key)` | Static; call once. |
+
+### Graph
+
+| Method | Description |
+|---|---|
+| `construct(data)` | Replace data + re-render. |
+| `changeLayout(direction)` | Switch direction. |
+| `collapse(id)` / `expand(id)` | Programmatic expand/collapse. |
+| `fitScreen()` | Re-fit viewBox. |
+| `centerOnNode(id)` | Pan/zoom to node. |
+| `getNodeMap()` / `getRootNodeId()` / `getNodeLabel(id)` | Introspection. |
+| `findNodesByQuery(q)` / `setSearchHighlight(ids)` | Search. |
+| `getSelection()` / `setSelection(ids)` / `clearSelection()` | Selection. |
+| `onSelectionChange(fn)` | Subscribe. `null` to unsubscribe. |
+| `setBreadcrumbHandler(fn)` | Breadcrumb segment click. |
+| `exportToSvg()` | SVG download. |
+
+---
+
+## Pitfalls — ❌ Wrong vs ✅ Correct
+
+### 1. Data on constructor
+❌ `new ApexTree(el, rootNode)`
+✅ `new ApexTree(el, options).render(rootNode)`
+
+### 2. Missing `children: []`
+❌ `{ id: 'leaf', name: 'X' }` — iteration errors.
+✅ `{ id: 'leaf', name: 'X', children: [] }`
+
+### 3. Duplicate ids
+❌ Two `{ id: 'a' }` nodes anywhere in the tree.
+✅ Globally unique ids.
+
+### 4. Missing `render()`
+❌ Just constructing.
+✅ `tree.render(data)`.
+
+### 5. `enableSelection: true`
+❌ Type error / no selection.
+✅ `enableSelection: 'single'` or `'multi'`.
+
+### 6. Selection callback in options
+❌ `new ApexTree(el, { onSelectionChange })`.
+✅ `graph.onSelectionChange((ids) => ...)`.
+
+### 7. Hand-rolling the org-card layout
+❌ Custom `nodeTemplate` for avatar / title / subtitle.
+✅ `contentKey: 'data'` + structured `data: { name, title, subtitle, imageURL, accentColor, badge }`.
+
+### 8. No `destroy()` on unmount
+❌ Observer leak.
+✅ Return `() => tree.destroy()` from cleanup.
+
+### 9. Full reconstruct just to swap data
+❌ `tree.destroy(); new ApexTree(el, opts).render(newData)`.
+✅ `graph.construct(newData)`.
+
+### 10. Mutating the tree in place
+❌ `data.children.push(newChild)` — no update.
+✅ `graph.construct({ ...data, children: [...data.children, newChild] })`.
+
+### 11. Hover shows nothing
+❌ `enableTooltip` defaults to `false`.
+✅ Set `enableTooltip: true` and (optionally) supply `tooltipTemplate`.
+
+### 12. License watermark
+❌ Skipping `setLicense`.
+✅ `ApexTree.setLicense('KEY')` once at app startup.
+
+---
+
+## Framework Wrappers
+
+```bash
+npm install react-apextree   # React
+npm install vue-apextree     # Vue 3
+npm install ngx-apextree     # Angular
+```
+
+All wrappers handle `destroy()` automatically on unmount.
