@@ -7,7 +7,9 @@ description: >
   or directional tree visualization with `apextree`. Covers the recursive
   `NestedNode` data shape, four grow directions, edge styles, the `'data'`
   contentKey for org-card layouts, custom `nodeTemplate`, search / breadcrumb /
-  selection APIs, and framework integration (React / Vue / Angular).
+  selection APIs, and framework integration (React / Vue / Angular). In
+  React / Vue / Angular projects, prefer the framework wrapper packages
+  (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
 metadata:
   author: ApexCharts
   version: "1.0.0"
@@ -20,6 +22,13 @@ metadata:
 ---
 
 # ApexTree AI Skill
+
+> **Framework wrapper detection — check `package.json` before generating code.**
+> - `react` → use **`react-apextree`** instead of the core API.
+> - `vue` → use **`vue-apextree`**.
+> - `@angular/core` → use **`ngx-apextree`**.
+>
+> Wrappers handle `destroy()` automatically on unmount, accept reactive props, and forward events as idiomatic framework events. Use the core API directly only when no framework is detected, or when the user explicitly asks for vanilla. See `references/framework-wrappers.md`.
 
 ## 1. Critical Rules
 
