@@ -2,6 +2,16 @@
 
 AI coding skill for building [ApexTree](https://apexcharts.com/docs/apextree/) organizational / hierarchical SVG tree charts. Works with Claude Code, Cursor, GitHub Copilot, and any AI coding assistant.
 
+> **Separate skill — one of the ApexCharts ecosystem skills.** This is the dedicated skill for **ApexTree** (`apextree`), shipped as its own `apextree-skill` package and repo — distinct from the core `apexcharts-skill` and the other product skills. Each product has its own library and skill; use the one that matches yours:
+>
+> | Product | npm library | Skill package & repo |
+> |---|---|---|
+> | ApexCharts — charts | `apexcharts` | [`apexcharts-skill`](https://github.com/apexcharts/apexcharts-skill) |
+> | ApexGantt — Gantt / timeline | `apexgantt` | [`apexgantt-skill`](https://github.com/apexcharts/apexgantt-skill) |
+> | **ApexTree** — hierarchy / org charts · *this skill* | `apextree` | `apextree-skill` |
+> | ApexSankey — flow / Sankey | `apexsankey` | [`apexsankey-skill`](https://github.com/apexcharts/apexsankey-skill) |
+> | Apex Grid — data grid | `apex-grid` | [`apexgrid-skill`](https://github.com/apexcharts/apexgrid-skill) |
+
 ## What This Does
 
 AI models routinely get tree-chart code wrong: passing data to the constructor, missing `children: []` on leaves, treating `enableSelection` as a boolean, hand-rolling org-card markup when the built-in template covers it. This skill ships structured reference files so the assistant generates correct ApexTree code on the first try.
