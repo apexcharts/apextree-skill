@@ -13,7 +13,7 @@ description: >
 metadata:
   author: ApexCharts
   version: "1.0.0"
-  library_version: ">=2.0.0"
+  library_version: "1.12.1"
   category: data-visualization
   tags: [tree, hierarchy, org-chart, diagram, charts, svg, apextree]
   docs: https://apexcharts.com/docs/apextree/
