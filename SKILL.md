@@ -12,8 +12,8 @@ description: >
   (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
 metadata:
   author: ApexCharts
-  version: "1.2.0"
-  library_version: "1.12.1"
+  version: "1.3.0"
+  library_version: "1.13.0"
   category: data-visualization
   tags: [tree, hierarchy, org-chart, diagram, charts, svg, apextree]
   docs: https://apexcharts.com/docs/apextree/
@@ -40,7 +40,7 @@ metadata:
 6. **`enableSelection` is `'single' | 'multi' | false`**, not a boolean. `false` means selection is off; `'single'` and `'multi'` are the active modes.
 7. **`onSelectionChange(listener)` is on the `Graph`** returned by `render`, not on `tree` and not in `options`.
 8. **Use `contentKey: 'data'`** to switch the built-in template into org-card mode (avatar, name, title, subtitle, badge, accent stripe). Don't write a custom `nodeTemplate` for that — the built-in one is already there.
-9. **For custom rendering use `nodeTemplate(content)`** where `content` is the value at `contentKey`. Set `contentKey: 'data'` for structured payloads.
+9. **For custom rendering use `nodeTemplate(content, context?)`** where `content` is the value at `contentKey` and the optional `context` carries `{ direction, cardImagePosition }`. Set `contentKey: 'data'` for structured payloads.
 10. **`direction` is `'top' | 'bottom' | 'left' | 'right'`** — controls where the root sits and which way the tree grows.
 11. **Per-node options** live on `node.options` and can override font, border, tooltip, and node visuals for a single node.
 12. **Call `destroy()`** before unmounting in React / Vue / Angular — it frees `ResizeObserver`s and tooltip DOM.
@@ -88,7 +88,7 @@ const graph = tree.render(data);
 
 ### Org-card mode (built-in `'data'` template)
 
-Set `contentKey: 'data'` and put structured fields into `node.data`. The built-in template renders avatar / name / title / subtitle / badge / accent stripe automatically:
+Set `contentKey: 'data'` and put structured fields into `node.data`. The built-in template renders avatar / name / title / subtitle / badge / accent stripe (and optional `meta` icon+label rows) automatically:
 
 ```js
 const data = {
@@ -100,6 +100,7 @@ const data = {
     imageURL: 'https://example.com/alice.jpg',
     accentColor: '#6366f1',
     badge: { text: 'Active', color: '#EEF2FF' },
+    meta: [{ icon: 'bi bi-envelope', label: 'alice@corp.com' }, { label: 'ext. 4021' }],  // extra icon+label rows
   },
   children: [],
 };
@@ -126,6 +127,8 @@ new ApexTree(el, {
     </div>`,
 }).render(data);
 ```
+
+> The optional 2nd arg carries layout context: `nodeTemplate: (c, { direction, cardImagePosition }) => …` — adapt avatar placement or flip the layout by growth direction without reaching for globals.
 
 ### Per-node style overrides
 
@@ -165,7 +168,8 @@ const data = {
 | `highlightOnHover` | `boolean` | `true` | Highlight node + connecting edges on hover. |
 | `edgeStyle` | `'orthogonal'\|'curved'\|'straight'` | `'orthogonal'` | Connector shape. |
 | `edgeColorMode` | `'default'\|'node'` | `'default'` | `'node'` = each edge inherits the child node's `borderColor`. |
-| `nodeTemplate` | `(content) => string` | built-in | Custom node HTML. |
+| `nodeTemplate` | `(content, context?) => string` | built-in | Custom node HTML. Optional 2nd arg `context` = `{ direction, cardImagePosition }`. |
+| `cardImagePosition` | `'left' \| 'top'` | `'left'` | Org-card avatar placement; `'top'` centers the avatar above the text. Also surfaced to `nodeTemplate` via `context`. |
 | `enableTooltip` | `boolean` | `false` | Hover tooltip. |
 | `onNodeClick` | `(node) => void` | — | Click callback (raw node data). |
 | `a11y` | `{ enabled?, label? }` | `{ true, 'Organizational chart' }` | WCAG 2.1 AA + keyboard nav. |

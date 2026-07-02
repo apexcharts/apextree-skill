@@ -47,8 +47,11 @@ interface OrgNodeData {
   imageURL?: string;         // avatar URL — rendered as 40×40 circular image on the left
   accentColor?: string;      // colored left-stripe (any CSS color)
   badge?: { text: string; color?: string };   // status chip (upper-right)
+  meta?: { icon?: string; label: string }[];  // (1.13.0) extra icon+label rows under subtitle; `icon` is a CSS icon class
 }
 ```
+
+Avatar placement is controlled by the `cardImagePosition` option (`'left'` default, or `'top'` to center the avatar above the text). A custom `nodeTemplate` receives it — plus the tree `direction` — via its optional 2nd `context` argument: `nodeTemplate: (content, { direction, cardImagePosition }) => …`.
 
 ```js
 const data = {

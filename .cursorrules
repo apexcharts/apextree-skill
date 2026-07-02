@@ -156,7 +156,7 @@ tree.destroy();                                // before unmount
 
 ### 7. Hand-rolling the org-card layout
 ❌ Custom `nodeTemplate` for avatar / title / subtitle.
-✅ `contentKey: 'data'` + structured `data: { name, title, subtitle, imageURL, accentColor, badge }`.
+✅ `contentKey: 'data'` + structured `data: { name, title, subtitle, imageURL, accentColor, badge, meta }` (1.13.0: `meta` icon+label rows; `cardImagePosition: 'left'|'top'`; `nodeTemplate` gets an optional 2nd `context` arg `{ direction, cardImagePosition }`).
 
 ### 8. No `destroy()` on unmount
 ❌ Observer leak.
