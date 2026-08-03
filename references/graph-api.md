@@ -111,8 +111,17 @@ btn.addEventListener('click', () => graph.exportToSvg());
 | `getNodeMap()` | `Record<string, Node>` — all nodes by id. |
 | `getRootNodeId()` | id of the root. |
 | `getNodeLabel(id)` | resolved display label for a node. |
+| `getMessages()` | `TreeMessages` — resolved, localized strings for this chart (English defaults merged with `locale.messages`). |
+| `getIsRtl()` | `boolean` — whether the current `locale.direction` resolves to right-to-left. |
 
 Useful when integrating with custom UI (a side panel showing the selected node's children, an export filter, etc.).
+
+`getMessages()` / `getIsRtl()` reflect the `locale` option (added in 1.14.0). The related exported types are `LocaleOptions` (`{ direction?: TextDirection, messages?: Partial<TreeMessages> }`), `TreeMessages`, `NodeAriaContext`, `TextDirection` (`'ltr' | 'rtl' | 'auto'`), and the `DEFAULT_TREE_MESSAGES` constant holding the English defaults.
+
+```js
+graph.getIsRtl();       // true when locale.direction resolves to rtl
+graph.getMessages();    // { searchPlaceholder, nodeAriaLabel, … }
+```
 
 ## Keyboard shortcuts
 

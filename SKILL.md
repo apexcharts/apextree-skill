@@ -12,8 +12,8 @@ description: >
   (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
 metadata:
   author: ApexCharts
-  version: "1.3.0"
-  library_version: "1.13.0"
+  version: "1.4.0"
+  library_version: "1.15.0"
   category: data-visualization
   tags: [tree, hierarchy, org-chart, diagram, charts, svg, apextree]
   docs: https://apexcharts.com/docs/apextree/
@@ -173,6 +173,29 @@ const data = {
 | `enableTooltip` | `boolean` | `false` | Hover tooltip. |
 | `onNodeClick` | `(node) => void` | — | Click callback (raw node data). |
 | `a11y` | `{ enabled?, label? }` | `{ true, 'Organizational chart' }` | WCAG 2.1 AA + keyboard nav. |
+| `locale` | `{ direction?, messages? }` | `{ direction: 'ltr' }` | Text/layout direction and string overrides. `direction: 'rtl'` mirrors the tree; `messages` is a `Partial<TreeMessages>`. See Localization / RTL below. |
+
+### Localization / RTL
+
+The `locale` option controls both text direction and every user-facing string. It is fully additive: the default `{ direction: 'ltr' }` with English strings reproduces the pre-i18n output exactly.
+
+```js
+new ApexTree(el, {
+  direction: 'top',
+  locale: {
+    direction: 'rtl',
+    messages: {
+      searchPlaceholder: 'بحث…',
+      searchMatchCount: (n) => `${n} نتيجة`,
+    },
+  },
+}).render(data);
+```
+
+- **`direction: 'ltr' | 'rtl' | 'auto'`** (default `'ltr'`). `'rtl'` mirrors the tree horizontally and sets `dir="rtl"` on the container, so node text and the search / breadcrumb chrome flow right-to-left; `'auto'` defers to the document/element direction. RTL mirroring is tuned for the vertical (`'top'` / `'bottom'`) growth directions.
+- **`messages`** is a `Partial<TreeMessages>` overriding any subset of strings. Unset keys keep their English defaults (exported as `DEFAULT_TREE_MESSAGES`), so you only translate what you need. Plain labels are strings; values that embed runtime data (`searchMatchCount`, `nodeAriaLabel`) are functions, so each locale controls its own grammar and pluralization.
+
+`TreeMessages` keys: `rootAriaLabel`, `searchPlaceholder`, `searchAriaLabel`, `searchMatchCount(count)`, `breadcrumbAriaLabel`, `expandNodeLabel`, `collapseNodeLabel`, `nodeAriaLabel(ctx)`. The `nodeAriaLabel` function receives a `NodeAriaContext` of `{ name, level, position, total, state? }`. The legacy `a11y.label` still overrides `rootAriaLabel` when set.
 
 ---
 
@@ -212,7 +235,7 @@ tree.destroy();                              // before unmount
 | `render(rootNode)` | Paint. Returns a `Graph`. **Required.** |
 | `destroy()` | Tear down. |
 | `getInstanceId()` | Unique chart instance id. |
-| `ApexTree.setLicense(key)` | Static; call once at app startup. |
+| `ApexTree.setLicense(key)` | Static; call once at app startup. Keys are ECDSA P-256 signature-verified as of 1.15.0; unsigned keys keep working until 2027-07-31. |
 
 ### Graph (returned by `render`)
 
