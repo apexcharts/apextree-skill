@@ -48,11 +48,11 @@ function OrgChart({ data, options }) {
   useEffect(() => {
     const tree = new ApexTree(ref.current, options);
     graphRef.current = tree.render(data);
-    return () => tree.destroy();
+    return () => tree.destroy();         // 2.1.0: idempotent, stops the spring loop
   }, [options]);          // construct only when options change
 
   useEffect(() => {
-    graphRef.current?.construct(data);   // hot-swap data
+    graphRef.current?.updateData(data);  // hot-swap data: diffs + animates, state survives
   }, [data]);
 
   return <div ref={ref} />;
@@ -148,8 +148,8 @@ export class OrgComponent {
 
 | ❌ | ✅ |
 |---|---|
-| Recreating the chart in every render without `destroy()` | Always return `() => tree.destroy()` from `useEffect` cleanup / `onBeforeUnmount` / `ngOnDestroy` |
-| Mutating the tree (`data.value.children.push(...)`) | Replace the reference — `data.value = { ...data.value, children: [...] }` (or `graph.construct(...)` in vanilla) |
-| Re-constructing the chart for every data change | Construct once on mount; call `graph.construct(newData)` for data swaps |
+| Recreating the chart in every render without `destroy()` | Always return `() => tree.destroy()` from `useEffect` cleanup / `onBeforeUnmount` / `ngOnDestroy`. Since 2.1.0 `destroy()` also stops the spring animation loop and is idempotent; without it a tree torn down mid-animation keeps ticking against detached DOM |
+| Mutating the tree (`data.value.children.push(...)`) | Replace the reference: `data.value = { ...data.value, children: [...] }` (or `graph.updateData(...)` in vanilla) |
+| Re-constructing the chart for every data change | Construct once on mount; call `graph.updateData(newData)` for data swaps (diffs and animates; collapse/selection/focus survive) |
 | Vue template using camel-case event | Vue normalises to kebab-case: `@selection-change` (not `@selectionChange`) |
 | Calling `setLicense` per component | Call `ApexTree.setLicense(KEY)` exactly once at app startup |

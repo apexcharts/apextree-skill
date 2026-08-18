@@ -18,11 +18,14 @@ AI models routinely get tree-chart code wrong: passing data to the constructor, 
 
 ### Coverage
 
-- **`NestedNode` data shape** — `id` / `name` / `children` rules, recursive children, per-node options
-- **Org-card mode** — `contentKey: 'data'` and the built-in avatar / title / badge template
-- **Custom `nodeTemplate`** — receiving the value at `contentKey`
-- **Lifecycle** — `setLicense()`, construct, `render()`, the returned `Graph`, `destroy()`
-- **Graph API** — collapse/expand, layout direction, search, breadcrumb, selection, exporting
+Verified against apextree 2.1.0.
+
+- **`NestedNode` data shape**: `id` / `name` / `children` rules, recursive children, per-node options and sizing, lazy children (`hasChildren` + `loadChildren`)
+- **Org-card mode**: `contentKey: 'data'` and the built-in avatar / title / badge template, plus the 2.0 expandable-card fields (`tags`, `stats`, `progress`, `actions`, `details`)
+- **Custom `nodeTemplate`**: receiving the value at `contentKey`, the `context` argument (`direction`, `cardImagePosition`, `expanded`, `lod`)
+- **Lifecycle**: `setLicense()`, construct, `render()`, the returned `Graph`, live `updateData()` diffs, `destroy()`
+- **Graph API**: collapse/expand (single, batch, to-depth, subtree), layout direction (including `'radial'` and `layoutType: 'cluster'`), focus mode, active path / edge flow, expandable cards, search, breadcrumb, selection, exporting
+- **2.x behavior**: spring motion defaults, `maxZoomNodeSpan`, semantic zoom, command palette, count badges, the redesigned expand/collapse button, family `--apx-*` theme tokens and registered theme names
 - **Framework wrappers**: `react-apextree`, `vue-apextree`, `ngx-apextree`
 
 ## Installation

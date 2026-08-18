@@ -18,13 +18,15 @@ Wrappers handle `destroy()` automatically on unmount, accept reactive props, and
 1. **Data goes to `render(rootNode)`, not the constructor.** Constructor takes `(element, options)`.
 2. **Every node has `id`, `name`, `children`.** Leaves have `children: []` (empty array, not omitted).
 3. **`id` must be unique across the entire tree.**
-4. **`render()` returns a `Graph`.** Keep it — it exposes `collapse`, `expand`, search, selection, layout APIs.
+4. **`render()` returns a `Graph`.** Keep it: it exposes `collapse`, `expand`, `updateData`, `focus`, search, selection, layout APIs.
 5. **`enableSelection` is `'single' | 'multi' | false`**, not a boolean.
 6. **Selection callbacks are on the `Graph`**: `graph.onSelectionChange(fn)`, not in options.
 7. **Use `contentKey: 'data'` for the built-in org-card template** — don't hand-roll the avatar / title / subtitle layout.
-8. **`direction` is `'top' | 'bottom' | 'left' | 'right'`.**
-9. **Call `destroy()`** before unmounting in React / Vue / Angular.
+8. **`direction` is `'top' | 'bottom' | 'left' | 'right' | 'radial'`** (2.0). `layoutType: 'cluster'` gives a dendrogram.
+9. **Call `destroy()`** before unmounting in React / Vue / Angular. Since 2.1.0 it also stops the spring animation loop; it is idempotent.
 10. **Set license once** with `ApexTree.setLicense('KEY')` at app startup.
+11. **Motion is on by default since 2.0.** Node positions read from the DOM right after `render()` are the seed, not the settled layout; use `enableAnimation: false` for synchronous positions. Tune with `motion: { spring: 'crisp'|'gentle'|'snappy', stagger: 'wave'|'none' }`.
+12. **Use `graph.updateData(newData)` for live data**: it diffs and animates, and collapse / selection / focus state survives. `graph.construct(newData)` is a hard rebuild.
 
 ---
 
@@ -93,8 +95,9 @@ const tree  = new ApexTree(el, options);
 const graph = tree.render(rootNode);           // REQUIRED, keep the Graph
 graph.changeLayout('left');
 graph.collapse('node-2');
-graph.construct(newData);                      // replace data, re-render
-tree.destroy();                                // before unmount
+graph.updateData(newData);                     // live data: diff + animate, state survives
+graph.construct(newData);                      // hard rebuild
+tree.destroy();                                // before unmount (idempotent, 2.1.0)
 ```
 
 ---
@@ -114,11 +117,17 @@ tree.destroy();                                // before unmount
 
 | Method | Description |
 |---|---|
-| `construct(data)` | Replace data + re-render. |
+| `updateData(data)` | Diff + animate to a new dataset; state survives. Preferred for live data. |
+| `construct(data)` | Replace data + re-render (hard rebuild). |
 | `changeLayout(direction)` | Switch direction. |
 | `collapse(id)` / `expand(id)` | Programmatic expand/collapse. |
+| `expandAll()` / `collapseAll()` / `expandToDepth(n)` / `expandSubtree(id)` / `collapseSubtree(id)` | Batch verbs, one reflow each. |
 | `fitScreen()` | Re-fit viewBox. |
 | `centerOnNode(id)` | Pan/zoom to node. |
+| `zoom(factor)` | Step zoom on the live viewBox (`zoom(0.2)` in, `zoom(-0.2)` out). |
+| `focus(id)` / `clearFocus()` / `getFocusedNodeId()` | Spotlight a node's lineage + subtree. |
+| `setActivePath(ids)` / `clearActivePath()` / `getActivePath()` | Animated root-to-node edge flow (`edgeFlow` option). |
+| `expandCard(id)` / `collapseCard(id)` / `toggleCard(id)` / `setExpandedCards(ids)` / `getExpandedCards()` | In-place expandable cards (needs `autoNodeHeight`). |
 | `getNodeMap()` / `getRootNodeId()` / `getNodeLabel(id)` | Introspection. |
 | `findNodesByQuery(q)` / `setSearchHighlight(ids)` | Search. |
 | `getSelection()` / `setSelection(ids)` / `clearSelection()` | Selection. |
@@ -156,7 +165,7 @@ tree.destroy();                                // before unmount
 
 ### 7. Hand-rolling the org-card layout
 ❌ Custom `nodeTemplate` for avatar / title / subtitle.
-✅ `contentKey: 'data'` + structured `data: { name, title, subtitle, imageURL, accentColor, badge, meta }` (1.13.0: `meta` icon+label rows; `cardImagePosition: 'left'|'top'`; `nodeTemplate` gets an optional 2nd `context` arg `{ direction, cardImagePosition }`).
+✅ `contentKey: 'data'` + structured `data: { name, title, subtitle, imageURL, accentColor, badge, meta }` (1.13.0: `meta` icon+label rows; `cardImagePosition: 'left'|'top'`). 2.0 adds `tags` (always visible) plus `stats` / `progress` / `actions` / `details` shown when the card is expanded in place; `nodeTemplate` gets an optional 2nd `context` arg `{ direction, cardImagePosition, expanded, lod }`.
 
 ### 8. No `destroy()` on unmount
 ❌ Observer leak.
@@ -164,11 +173,11 @@ tree.destroy();                                // before unmount
 
 ### 9. Full reconstruct just to swap data
 ❌ `tree.destroy(); new ApexTree(el, opts).render(newData)`.
-✅ `graph.construct(newData)`.
+✅ `graph.updateData(newData)` (diffs and animates; `construct(newData)` for a deliberate hard reset).
 
 ### 10. Mutating the tree in place
 ❌ `data.children.push(newChild)` — no update.
-✅ `graph.construct({ ...data, children: [...data.children, newChild] })`.
+✅ `graph.updateData({ ...data, children: [...data.children, newChild] })`.
 
 ### 11. Hover shows nothing
 ❌ `enableTooltip` defaults to `false`.
