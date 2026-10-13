@@ -5,8 +5,8 @@
 ```ts
 interface NestedNode<T = undefined> {
   id: string;                                   // REQUIRED, globally unique across the tree
-  name: string;                                 // REQUIRED, label (when contentKey: 'name')
-  children: NestedNode<T>[];                    // REQUIRED — empty array for leaves
+  name: string;                                 // label when contentKey: 'name' (numbers print as text)
+  children: NestedNode<T>[];                    // required by the TS types; at runtime a leaf may omit it (read as [])
   hasChildren?: boolean;                        // advertise unloaded children (lazy loading)
   data?: T;                                     // arbitrary payload (used when contentKey: 'data')
   options?: Partial<NodeOptions & FontOptions & TooltipOptions>;   // per-node overrides
@@ -16,7 +16,7 @@ interface NestedNode<T = undefined> {
 **Key rules:**
 
 - `id` is unique across the *entire* tree (not just within a level). Selection, search, breadcrumb, edge highlighting, and lineage tracking all key off it.
-- `children` is **never** omitted on a leaf — pass `children: []`.
+- `children` may be omitted (or `null`) on a leaf: ApexTree reads it as `[]`. Typed code passes `children: []` because the TypeScript types declare it required. Only a non-array value such as `{}` is an error, and it crashes the layout.
 - `name` is the default display label. Switch via `contentKey` if your data uses a different field.
 
 ## Default `'name'` mode

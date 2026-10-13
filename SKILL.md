@@ -15,7 +15,7 @@ description: >
   (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
 metadata:
   author: ApexCharts
-  version: "1.5.1"
+  version: "1.5.2"
   library_version: "2.1.1"
   category: data-visualization
   tags: [tree, hierarchy, org-chart, diagram, charts, svg, apextree]
@@ -36,7 +36,7 @@ metadata:
 ## 1. Critical Rules
 
 1. **Data is a single `NestedNode`** (the root) passed to `render(data)`, **not** to the constructor. Constructor takes `(element, options)`; `render(rootNode)` paints.
-2. **Every node needs `id`, `name`, and `children`.** Leaves have `children: []` — not `undefined` and not omitted.
+2. **Every node needs an `id` and a label** (`name`, or the field `contentKey` names). `children` is optional at runtime: a leaf may omit it or set it to `null`, and ApexTree reads that as `[]`. A lazy node (`hasChildren: true`) omits it on purpose. The TypeScript types declare `children` required, so typed code passes `[]` on leaves. Any other non-array value (e.g. `children: {}`) crashes the layout.
 3. **`id` must be unique across the entire tree.** Selection, edge highlighting, search, and breadcrumb all key off `id`.
 4. **`render(data)` returns a `Graph` instance.** Save it: it exposes `collapse`, `expand`, `updateData`, `focus`, `fitScreen`, `centerOnNode`, search APIs, and selection APIs.
 5. **`enableExpandCollapseZoom: true` (default)** re-fits the viewBox on collapse / expand, capped by `maxZoomNodeSpan` (default `8`) so a view of a few remaining nodes doesn't balloon. `maxZoomNodeSpan: 0` restores the pre-2.0 tight fit; `enableExpandCollapseZoom: false` keeps the camera locked.
@@ -59,8 +59,8 @@ metadata:
 ```ts
 interface NestedNode<T = undefined> {
   id: string;                                          // REQUIRED, unique across the whole tree
-  name: string;                                        // REQUIRED, display label (when contentKey is 'name')
-  children: NestedNode<T>[];                           // REQUIRED — empty array for leaves
+  name: string;                                        // display label when contentKey is 'name'; a missing name renders a blank card
+  children: NestedNode<T>[];                           // required by the TS types; at runtime a leaf may omit it (read as [])
   hasChildren?: boolean;                               // advertise unloaded children (lazy loading via loadChildren)
   data?: T;                                            // arbitrary payload, used when contentKey: 'data'
   options?: Partial<FontOptions & NodeOptions & TooltipOptions>;   // per-node overrides (incl. nodeWidth / nodeHeight)
@@ -212,7 +212,7 @@ Every ApexCharts-family chart reads five shared CSS custom properties, so a page
 
 Resolution precedence (highest first): product CSS variable (`--apex-tree-*`) > explicit option > `--apx-*` token > built-in default. An option set to a value equal to its built-in default is indistinguishable from one left alone, so the token wins there; pin with a product variable if needed.
 
-Named themes: `registerTheme('acme', { tokens: { accent, fore, grid, surface } })` from `@apex/commons` records a token set on a registry shared by the whole family. Reference it via `theme: 'acme'`: behaves like `'custom'` (no CSS injection) plus that theme's tokens, resolved one layer below the CSS cascade. The theme name is always written to `data-apex-tree-theme` on the container.
+Named themes: a theme name refers to a token set on the registry the whole Apex family shares. apextree exports no `registerTheme` of its own; register one with `ApexCharts.registerTheme('acme', { tokens: { accent, fore, grid, surface } })` when ApexCharts is on the page (the `@apex/commons` module behind the registry is internal and not published to npm). An unregistered name falls back to the default palette. Reference it via `theme: 'acme'`: behaves like `'custom'` (no CSS injection) plus that theme's tokens, resolved one layer below the CSS cascade. The theme name is always written to `data-apex-tree-theme` on the container.
 
 ### Reduced motion
 
@@ -325,9 +325,9 @@ tree.destroy();                              // before unmount; idempotent (2.1.
 ❌ `new ApexTree(el, { id: '1', name: 'A', children: [...] })`
 ✅ `new ApexTree(el, options).render(rootNode)`
 
-### 2. Missing `children: []` on a leaf
-❌ `{ id: '5', name: 'Leaf' }` — runtime errors when iterating.
-✅ `{ id: '5', name: 'Leaf', children: [] }`
+### 2. A non-array `children`
+❌ `{ id: '5', name: 'Leaf', children: {} }`: the layout calls `.map` on it and crashes.
+✅ `{ id: '5', name: 'Leaf', children: [] }`, or omit `children` on a leaf (it is read as `[]`).
 
 ### 3. Duplicate ids
 ❌ Two nodes with `id: 'a'` — selection and edge highlighting target the wrong one.

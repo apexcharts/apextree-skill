@@ -16,7 +16,7 @@ Wrappers handle `destroy()` automatically on unmount, accept reactive props, and
 ## Critical Rules
 
 1. **Data goes to `render(rootNode)`, not the constructor.** Constructor takes `(element, options)`.
-2. **Every node has `id`, `name`, `children`.** Leaves have `children: []` (empty array, not omitted).
+2. **Every node has an `id` and a label (`name`).** `children` may be omitted or `null` on a leaf (read as `[]`); the TS types require it, so typed code passes `[]`. A non-array value crashes.
 3. **`id` must be unique across the entire tree.**
 4. **`render()` returns a `Graph`.** Keep it: it exposes `collapse`, `expand`, `updateData`, `focus`, search, selection, layout APIs.
 5. **`enableSelection` is `'single' | 'multi' | false`**, not a boolean.
@@ -36,7 +36,7 @@ Wrappers handle `destroy()` automatically on unmount, accept reactive props, and
 interface NestedNode<T = undefined> {
   id: string;                       // REQUIRED, globally unique
   name: string;                     // REQUIRED, label when contentKey === 'name'
-  children: NestedNode<T>[];        // REQUIRED, [] for leaves
+  children: NestedNode<T>[];        // required by the TS types; optional at runtime on leaves
   data?: T;                         // payload used when contentKey === 'data'
   options?: Partial<NodeOptions & FontOptions & TooltipOptions>;
 }
@@ -143,9 +143,9 @@ tree.destroy();                                // before unmount (idempotent, 2.
 ❌ `new ApexTree(el, rootNode)`
 ✅ `new ApexTree(el, options).render(rootNode)`
 
-### 2. Missing `children: []`
-❌ `{ id: 'leaf', name: 'X' }` — iteration errors.
-✅ `{ id: 'leaf', name: 'X', children: [] }`
+### 2. A non-array `children`
+❌ `{ id: 'leaf', name: 'X', children: {} }`: crashes the layout.
+✅ `{ id: 'leaf', name: 'X', children: [] }`, or omit it on a leaf.
 
 ### 3. Duplicate ids
 ❌ Two `{ id: 'a' }` nodes anywhere in the tree.
