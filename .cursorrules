@@ -24,7 +24,7 @@ Wrappers handle `destroy()` automatically on unmount, accept reactive props, and
 7. **Use `contentKey: 'data'` for the built-in org-card template** — don't hand-roll the avatar / title / subtitle layout.
 8. **`direction` is `'top' | 'bottom' | 'left' | 'right' | 'radial'`** (2.0). `layoutType: 'cluster'` gives a dendrogram.
 9. **Call `destroy()`** before unmounting in React / Vue / Angular. Since 2.1.0 it also stops the spring animation loop; it is idempotent.
-10. **Set license once** with `ApexTree.setLicense('KEY')` at app startup.
+10. **Set license once** with `ApexTree.setLicense('KEY')` at app startup. Without a key the tree renders with a trial watermark; production use needs one.
 11. **Motion is on by default since 2.0.** Node positions read from the DOM right after `render()` are the seed, not the settled layout; use `enableAnimation: false` for synchronous positions. Tune with `motion: { spring: 'crisp'|'gentle'|'snappy', stagger: 'wave'|'none' }`.
 12. **Use `graph.updateData(newData)` for live data**: it diffs and animates, and collapse / selection / focus state survives. `graph.construct(newData)` is a hard rebuild.
 
@@ -100,6 +100,8 @@ graph.construct(newData);                      // hard rebuild
 tree.destroy();                                // before unmount (idempotent, 2.1.0)
 ```
 
+Since 2.2.0 constructing, rendering and `destroy()` no longer empty the container: children it held when the tree was constructed stay. A new `ApexTree` on an element that already holds a live tree destroys the old one first. Works inside a shadow root (pass an element inside it as the container); styles, tooltips and keyboard focus stay inside it.
+
 ---
 
 ## API
@@ -110,7 +112,7 @@ tree.destroy();                                // before unmount (idempotent, 2.
 |---|---|
 | `new ApexTree(el, opts?)` | Construct. |
 | `render(root)` | Paint. Returns `Graph`. Required. |
-| `destroy()` | Tear down. |
+| `destroy()` | Tear down. Removes the chart's nodes, keeps what the container held before construction (2.2.0). |
 | `ApexTree.setLicense(key)` | Static; call once. |
 
 ### Graph
@@ -184,7 +186,7 @@ tree.destroy();                                // before unmount (idempotent, 2.
 ✅ Set `enableTooltip: true` and (optionally) supply `tooltipTemplate`.
 
 ### 12. License watermark
-❌ Skipping `setLicense`.
+❌ Skipping `setLicense`: the tree renders with a trial watermark.
 ✅ `ApexTree.setLicense('KEY')` once at app startup.
 
 ---

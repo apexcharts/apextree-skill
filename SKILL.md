@@ -15,8 +15,8 @@ description: >
   (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
 metadata:
   author: ApexCharts
-  version: "1.5.2"
-  library_version: "2.1.1"
+  version: "1.6.0"
+  library_version: "2.2.0"
   category: data-visualization
   tags: [tree, hierarchy, org-chart, diagram, charts, svg, apextree]
   docs: https://apexcharts.com/docs/apextree/
@@ -247,7 +247,7 @@ new ApexTree(el, {
 ```js
 import { ApexTree } from 'apextree';
 
-ApexTree.setLicense('KEY');                  // optional, once at app startup
+ApexTree.setLicense('KEY');                  // once at app startup; runs without it, but with a trial watermark
 
 const tree = new ApexTree(el, options);      // 1. construct
 const graph = tree.render(rootNode);         // 2. paint — REQUIRED. KEEP the returned Graph.
@@ -264,8 +264,10 @@ graph.exportToSvg();
 graph.updateData(nextRoot);                  // live data: diff + spring; state survives
 graph.construct(newRoot);                    // hard rebuild: replace data + re-render
 
-tree.destroy();                              // before unmount; idempotent (2.1.0)
+tree.destroy();                              // before unmount; idempotent (2.1.0); removes the chart's nodes (2.2.0)
 ```
+
+**The container keeps its other content (2.2.0)**: constructing, rendering and `destroy()` no longer empty the element. The children it held when the tree was constructed stay; `destroy()` removes everything else as the chart's own, so add your own markup before constructing. Constructing a new `ApexTree` on an element that already holds a live tree destroys the old one first.
 
 **Re-renders**: prefer `graph.updateData(newData)`: it diffs the tree, animates survivors to their new positions, and keeps collapse / selection / focus / expanded-card state. `graph.construct(newData)` is a full rebuild; `tree.render(newData)` additionally rebuilds the toolbar and chrome, so use it only for the first render or a deliberate hard reset. With `enableAnimation: false`, `updateData` still produces the correct end state, just without motion.
 
@@ -281,9 +283,9 @@ tree.destroy();                              // before unmount; idempotent (2.1.
 |---|---|
 | `new ApexTree(el, opts?)` | Construct; applies dimensions to `el`. |
 | `render(rootNode)` | Paint. Returns a `Graph`. **Required.** |
-| `destroy()` | Tear down: stops the spring loop, detaches every listener, releases the chart context (2.1.0). Idempotent. Call before dropping the instance. |
+| `destroy()` | Tear down: stops the spring loop, detaches every listener, releases the chart context (2.1.0). Since 2.2.0 it also removes the chart's nodes and keeps the children the container held before construction. Idempotent. Call before dropping the instance. |
 | `getInstanceId()` | Unique chart instance id. |
-| `ApexTree.setLicense(key)` | Static; call once at app startup. Keys are ECDSA P-256 signature-verified as of 1.15.0; unsigned keys keep working until 2027-07-31. |
+| `ApexTree.setLicense(key)` | Static; call once at app startup. Without a key the tree still renders, but with a trial watermark; production use needs a key. Keys are ECDSA P-256 signature-verified as of 1.15.0; unsigned keys keep working until 2027-07-31. |
 
 ### Graph (returned by `render`)
 
@@ -366,7 +368,7 @@ tree.destroy();                              // before unmount; idempotent (2.1.
 ✅ `enableTooltip: true` (and optionally pass a `tooltipTemplate`).
 
 ### 12. License watermark in production
-❌ No license call.
+❌ No license call: the tree works, but renders with a trial watermark. Production use needs a key.
 ✅ `ApexTree.setLicense('KEY')` once at app startup.
 
 ### 13. Measuring node positions right after `render()`
@@ -393,4 +395,4 @@ tree.destroy();                              // before unmount; idempotent (2.1.
 |---|---|
 | `NestedNode` shape, org-card mode, per-node options, `nodeTemplate`, lazy children, per-node sizing | `references/data-format.md` |
 | Graph API, `updateData`, batch expand/collapse, focus, active path, expandable cards, search, breadcrumb, selection, layout, exporting, teardown | `references/graph-api.md` |
-| React / Vue / Angular wrappers | `references/framework-wrappers.md` |
+| React / Vue / Angular wrappers, web components (shadow DOM) | `references/framework-wrappers.md` |

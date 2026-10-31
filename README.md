@@ -18,7 +18,7 @@ AI models routinely get tree-chart code wrong: passing data to the constructor, 
 
 ### Coverage
 
-Verified against apextree 2.1.1.
+Verified against apextree 2.2.0.
 
 - **`NestedNode` data shape**: `id` / `name` / `children` rules, recursive children, per-node options and sizing, lazy children (`hasChildren` + `loadChildren`)
 - **Org-card mode**: `contentKey: 'data'` and the built-in avatar / title / badge template, plus the 2.0 expandable-card fields (`tags`, `stats`, `progress`, `actions`, `details`)
@@ -70,7 +70,7 @@ const api   = await readFile(referencePath('graph-api.md'), 'utf8');
 ├── references/
 │   ├── data-format.md               # NestedNode, org-card, nodeTemplate
 │   ├── graph-api.md                 # collapse/expand, search, selection, layout
-│   └── framework-wrappers.md        # React, Vue, Angular
+│   └── framework-wrappers.md        # React, Vue, Angular, shadow DOM
 └── install/
     ├── claude-code.md
     ├── cursor.md

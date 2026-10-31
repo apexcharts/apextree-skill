@@ -144,6 +144,29 @@ export class OrgComponent {
 }
 ```
 
+## Web components (shadow DOM)
+
+Since 2.2.0 the core API works inside a shadow root: pass an element inside it as the container. Styles, tooltips and keyboard focus stay inside that root, and CSS variables set on the page or the host element (such as the `--apx-*` tokens) reach the chart. The tree adds its own nodes next to whatever the container held when it was constructed, and `destroy()` keeps those children.
+
+```js
+import { ApexTree } from 'apextree';
+
+class OrgTree extends HTMLElement {
+  connectedCallback() {
+    if (!this.el) {
+      this.el = document.createElement('div');
+      this.attachShadow({ mode: 'open' }).appendChild(this.el);
+    }
+    this.tree = new ApexTree(this.el, { width: 800, height: 500 });
+    this.graph = this.tree.render(this.data);
+  }
+  disconnectedCallback() {
+    this.tree?.destroy();
+  }
+}
+customElements.define('org-tree', OrgTree);
+```
+
 ## Common pitfalls in framework code
 
 | ❌ | ✅ |

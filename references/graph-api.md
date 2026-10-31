@@ -226,6 +226,8 @@ tree.destroy();   // before dropping the instance (component unmount, route chan
 
 As of 2.1.0, `destroy()` stops the spring animation loop, detaches every listener the graph and its controls installed, and releases the chart context. It is idempotent. Without it, a tree torn down mid-animation leaves its frame loop running against detached DOM until the springs settle.
 
+Since 2.2.0 `destroy()` also removes the chart's nodes (the SVG, toolbar, search box, breadcrumb). It keeps the children the container held when the tree was constructed and removes anything added after, so put your own markup in the container first. Constructing or rendering no longer clears the container either. Constructing a new `ApexTree` on an element that already holds a live tree destroys the old one first.
+
 ## Common pitfalls
 
 | ❌ | ✅ |
