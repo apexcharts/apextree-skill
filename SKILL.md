@@ -9,7 +9,8 @@ description: >
   `layoutType: 'cluster'` dendrograms), spring motion, live `updateData()`
   diffs, focus mode, expandable cards, semantic zoom, lazy children, edge
   styles, the `'data'` contentKey for org-card layouts, custom `nodeTemplate`,
-  search / breadcrumb / selection APIs, family `--apx-*` theme tokens, and
+  search / breadcrumb / selection APIs, family `--apx-*` theme tokens, the
+  free Ignite UI theming add-on (`apextree/ignite-ui`), and
   framework integration (React / Vue / Angular). In
   React / Vue / Angular projects, prefer the framework wrapper packages
   (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
@@ -164,7 +165,9 @@ const data = {
 | `contentKey` | `string` | `'name'` | Key on the data object used as the label. Set to `'data'` for structured payloads. |
 | `siblingSpacing` / `childrenSpacing` | `number` | `50` / `50` | Horizontal / vertical spacing (px). |
 | `nodeWidth` / `nodeHeight` | `number` | `50` / `30` | Node dimensions (px). |
-| `theme` | `'light'\|'dark'\|'custom'\|string` | `'light'` | Built-in palette. `'custom'` disables CSS-var injection so host vars win. Any other string (2.1.0) names a theme registered on the shared family registry and behaves like `'custom'` plus that theme's `--apx-*` tokens. See Theming below. |
+| `theme` | `'light'\|'dark'\|'custom'\|string` | `'light'` | Built-in palette. `'custom'` disables CSS-var injection so host vars win. Any other string (2.1.0) names a theme registered on the shared family registry and behaves like `'custom'` plus that theme's `--apx-*` tokens. See Theming below. From 2.3.0, left unset it follows a design system that declares a dark variant (Ignite UI, with its add-on). |
+| `tokens` | `boolean` | `true` | *(2.3.0)* `false` stops the tree reading the `--apx-*` family tokens and the page's design system (its variant included). |
+| `designSystem` | `boolean` | `true` | *(2.3.0)* `false` stops the tree reading the page's design system (Ignite UI's `--ig-*` tokens and variant); `--apx-*` still apply. Matters only while the `apextree/ignite-ui` add-on is loaded. |
 | `enableAnimation` | `boolean` | `true` | Spring-driven motion (2.0). `false` restores fully synchronous layout: positions are final immediately after `render()`. |
 | `motion` | `{ spring?, stagger? }` | `{ spring: 'crisp', stagger: 'wave' }` | Motion tuning. `spring: 'crisp'\|'gentle'\|'snappy'` picks the spring feel; `stagger: 'wave'\|'none'` radiates a reflow outward from the toggled node or moves everything together. |
 | `enableExpandCollapse` | `boolean` | `true` | Show expand/collapse buttons on parent nodes. |
@@ -210,9 +213,30 @@ Every option below defaults to off or neutral, so an upgraded 1.15 config render
 
 Every ApexCharts-family chart reads five shared CSS custom properties, so a page can state its brand once: `--apx-accent` (interactive/selected), `--apx-fore` (text), `--apx-grid` (borders, connectors), `--apx-surface` (background plane), and `--apx-series-1` … `--apx-series-N` (ordered palette, 1-based, stops at the first gap). Declare them on `:root` and they reach every chart on the page.
 
-Resolution precedence (highest first): product CSS variable (`--apex-tree-*`) > explicit option > `--apx-*` token > built-in default. An option set to a value equal to its built-in default is indistinguishable from one left alone, so the token wins there; pin with a product variable if needed.
+Resolution precedence (highest first), from 2.3.0: option you passed > `--apex-tree-*` variable > `--apx-*` token > `'dark'` preset or registered theme > design system (Ignite UI, with its add-on) > built-in default. An option counts as passed when it is in the options you gave the constructor, even at its default value. `--apx-font-family` (2.3.0) sets `fontFamily` the same way. (Through 2.2.0 the order was product CSS variable > explicit option > `--apx-*` > default, and an option equal to its built-in default lost to the token.)
 
-Named themes: a theme name refers to a token set on the registry the whole Apex family shares. apextree exports no `registerTheme` of its own; register one with `ApexCharts.registerTheme('acme', { tokens: { accent, fore, grid, surface } })` when ApexCharts is on the page (the `@apex/commons` module behind the registry is internal and not published to npm). An unregistered name falls back to the default palette. Reference it via `theme: 'acme'`: behaves like `'custom'` (no CSS injection) plus that theme's tokens, resolved one layer below the CSS cascade. The theme name is always written to `data-apex-tree-theme` on the container.
+Named themes: a theme name refers to a token set on the registry the whole Apex family shares. apextree exports no `registerTheme` of its own; register one with `ApexCharts.registerTheme('acme', { tokens: { accent, fore, grid, surface } })` when ApexCharts is on the page (the registry lives in the published `apex-commons` package, so `import { registerTheme } from 'apex-commons'` works too). An unregistered name falls back to the default palette. Reference it via `theme: 'acme'`: behaves like `'custom'` (no CSS injection) plus that theme's tokens, resolved one layer below the CSS cascade. The theme name is always written to `data-apex-tree-theme` on the container.
+
+### Ignite UI theming (from apextree 2.3.0)
+
+An opt-in add-on, **free, no licence key**. Load it once and trees follow the Ignite UI theme on the page: text, borders, the accent, the font, surfaces, the built-in card colours, light or dark.
+
+```js
+import 'apextree/ignite-ui';
+```
+
+```html
+<!-- without a bundler: before or after apextree.min.js -->
+<script src=".../apextree/apextree.min.js"></script>
+<script src=".../apextree/apextree.ignite-ui.min.js"></script>
+```
+
+- **Load order.** Before the first render; a tree rendered earlier picks it up on its next `render()` or `tree.refreshTokens()`. Without the add-on the `--ig-*` tokens are ignored, with no error; `--apx-*` work either way.
+- **What it maps.** Text `--ig-gray-800`, borders and edges `--ig-gray-300`, hover / badge / focus-ring accent `--ig-primary-seed`, `fontFamily` `--ig-font-family`, node and command palette surfaces `--ig-surface-raised` / `--ig-surface-overlay` (Ignite UI 7.5.0+), the org cards' text, chips, hairlines and links from its gray steps and primary. A card whose background you set (`nodeBGColor`, `--apex-tree-node-bg`) keeps the built-in card colours.
+- **Mode.** With `theme` unset, a dark Ignite UI variant renders the tree `'dark'`. Passing `theme: 'light'` pins light and blocks the dark variant.
+- **Per tree.** `designSystem: false` turns it off; `tokens: false` turns off `--apx-*` and the design system together.
+- **Stylesheet swap.** A light/dark switch that replaces the Ignite UI sheet does not render the tree: `themeLink.onload = () => tree.refreshTokens()`. It repaints at the current zoom and keeps nodes, expanded cards, selection, focus mode and the active path.
+- **Other products.** The add-on also themes ApexSankey and ApexGantt on the page (with several, load it from the newest package). ApexCharts charts take `apexcharts/features/ignite-ui`, which themes trees too, but on a script-tag page only once `apexcharts.js` has loaded, so load `apextree.ignite-ui.min.js` there for the trees.
 
 ### Reduced motion
 
@@ -285,6 +309,7 @@ tree.destroy();                              // before unmount; idempotent (2.1.
 | `render(rootNode)` | Paint. Returns a `Graph`. **Required.** |
 | `destroy()` | Tear down: stops the spring loop, detaches every listener, releases the chart context (2.1.0). Since 2.2.0 it also removes the chart's nodes and keeps the children the container held before construction. Idempotent. Call before dropping the instance. |
 | `getInstanceId()` | Unique chart instance id. |
+| `refreshTokens()` | *(2.3.0)* Re-read the `--apex-tree-*` variables, the `--apx-*` tokens, the registered theme and the page's design system, and repaint at the current zoom (nodes, expanded cards, selection, focus mode and the active path kept). Call it after a stylesheet swap (an Ignite UI light/dark switch) or an add-on loaded after the first render. No-op before `render()`. |
 | `ApexTree.setLicense(key)` | Static; call once at app startup. Without a key the tree still renders, but with a trial watermark; production use needs a key. Keys are ECDSA P-256 signature-verified as of 1.15.0; unsigned keys keep working until 2027-07-31. |
 
 ### Graph (returned by `render`)
@@ -386,6 +411,10 @@ tree.destroy();                              // before unmount; idempotent (2.1.
 ### 16. Expandable cards that never grow
 ❌ `cardExpansion` / `toggleCard(id)` with a fixed `nodeHeight`: the card toggles but its height cannot change.
 ✅ Enable `autoNodeHeight: { enabled: true }` so the expanded card re-measures and siblings spring apart.
+
+### 17. Ignite UI theme ignored, or stuck light (2.3.0)
+❌ An Ignite UI stylesheet on the page and no add-on: every `--ig-*` token is ignored silently. Or `theme: 'light'` passed on a page with a dark Ignite UI theme: the pinned theme blocks the dark variant.
+✅ `import 'apextree/ignite-ui'` once (free) before the first render, leave `theme` unset, and call `tree.refreshTokens()` after swapping the Ignite UI stylesheet.
 
 ---
 

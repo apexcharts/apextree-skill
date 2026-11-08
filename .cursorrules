@@ -27,6 +27,7 @@ Wrappers handle `destroy()` automatically on unmount, accept reactive props, and
 10. **Set license once** with `ApexTree.setLicense('KEY')` at app startup. Without a key the tree renders with a trial watermark; production use needs one.
 11. **Motion is on by default since 2.0.** Node positions read from the DOM right after `render()` are the seed, not the settled layout; use `enableAnimation: false` for synchronous positions. Tune with `motion: { spring: 'crisp'|'gentle'|'snappy', stagger: 'wave'|'none' }`.
 12. **Use `graph.updateData(newData)` for live data**: it diffs and animates, and collapse / selection / focus state survives. `graph.construct(newData)` is a hard rebuild.
+13. **Ignite UI theming is an opt-in, free add-on (2.3.0)**: `import 'apextree/ignite-ui'` (script tag `apextree.ignite-ui.min.js`). Without it `--ig-*` is silently ignored. Ranking: option you passed > `--apex-tree-*` > `--apx-*` > `'dark'` preset / registered theme > Ignite UI > default. Leave `theme` unset so a dark Ignite UI variant renders `'dark'`. Off per tree: `designSystem: false`; `tokens: false` also drops `--apx-*`. After a stylesheet swap: `tree.refreshTokens()`.
 
 ---
 
@@ -188,6 +189,10 @@ Since 2.2.0 constructing, rendering and `destroy()` no longer empty the containe
 ### 12. License watermark
 ❌ Skipping `setLicense`: the tree renders with a trial watermark.
 ✅ `ApexTree.setLicense('KEY')` once at app startup.
+
+### 13. Ignite UI theme ignored or stuck light
+❌ Ignite UI stylesheet but no `apextree/ignite-ui` import (`--ig-*` ignored silently); or `theme: 'light'` pinned, which blocks the dark variant.
+✅ `import 'apextree/ignite-ui'` once before the first render, leave `theme` unset, `tree.refreshTokens()` after swapping the sheet.
 
 ---
 
