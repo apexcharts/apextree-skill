@@ -16,8 +16,8 @@ description: >
   (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
 metadata:
   author: ApexCharts
-  version: "1.6.0"
-  library_version: "2.2.0"
+  version: "1.7.0"
+  library_version: "2.3.0"
   category: data-visualization
   tags: [tree, hierarchy, org-chart, diagram, charts, svg, apextree]
   docs: https://apexcharts.com/docs/apextree/
@@ -227,8 +227,8 @@ import 'apextree/ignite-ui';
 
 ```html
 <!-- without a bundler: before or after apextree.min.js -->
-<script src=".../apextree/apextree.min.js"></script>
-<script src=".../apextree/apextree.ignite-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apextree@2.3.0/apextree.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apextree@2.3.0/apextree.ignite-ui.min.js"></script>
 ```
 
 - **Load order.** Before the first render; a tree rendered earlier picks it up on its next `render()` or `tree.refreshTokens()`. Without the add-on the `--ig-*` tokens are ignored, with no error; `--apx-*` work either way.
@@ -236,7 +236,7 @@ import 'apextree/ignite-ui';
 - **Mode.** With `theme` unset, a dark Ignite UI variant renders the tree `'dark'`. Passing `theme: 'light'` pins light and blocks the dark variant.
 - **Per tree.** `designSystem: false` turns it off; `tokens: false` turns off `--apx-*` and the design system together.
 - **Stylesheet swap.** A light/dark switch that replaces the Ignite UI sheet does not render the tree: `themeLink.onload = () => tree.refreshTokens()`. It repaints at the current zoom and keeps nodes, expanded cards, selection, focus mode and the active path.
-- **Other products.** The add-on also themes ApexSankey and ApexGantt on the page (with several, load it from the newest package). ApexCharts charts take `apexcharts/features/ignite-ui`, which themes trees too, but on a script-tag page only once `apexcharts.js` has loaded, so load `apextree.ignite-ui.min.js` there for the trees.
+- **Other products.** The add-on also themes ApexSankey and ApexGantt on the page (with several, load it from the newest package). ApexCharts charts take `apexcharts/features/ignite-ui`, which themes trees too, but on a script-tag page only once `apexcharts.js` has loaded, so load `apextree.ignite-ui.min.js` there for the trees. Apex Grid's own add-on (`apex-grid/ignite-ui`) is only in the 4.0 beta on npm's `next` tag (`npm install apex-grid@next`); a plain `npm install apex-grid` gets 3.6.0, which has no Ignite UI add-on.
 
 ### Reduced motion
 
