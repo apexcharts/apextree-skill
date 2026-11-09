@@ -10,7 +10,7 @@ description: >
   diffs, focus mode, expandable cards, semantic zoom, lazy children, edge
   styles, the `'data'` contentKey for org-card layouts, custom `nodeTemplate`,
   search / breadcrumb / selection APIs, family `--apx-*` theme tokens, the
-  free Ignite UI theming add-on (`apextree/ignite-ui`), and
+  Ignite UI theming add-on (`apextree/ignite-ui`, no extra licence key), and
   framework integration (React / Vue / Angular). In
   React / Vue / Angular projects, prefer the framework wrapper packages
   (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
@@ -219,7 +219,7 @@ Named themes: a theme name refers to a token set on the registry the whole Apex 
 
 ### Ignite UI theming (from apextree 2.3.0)
 
-An opt-in add-on, **free, no licence key**. Load it once and trees follow the Ignite UI theme on the page: text, borders, the accent, the font, surfaces, the built-in card colours, light or dark.
+An opt-in add-on that **needs no licence key of its own**. Load it once and trees follow the Ignite UI theme on the page: text, borders, the accent, the font, surfaces, the built-in card colours, light or dark.
 
 ```js
 import 'apextree/ignite-ui';
@@ -414,7 +414,7 @@ tree.destroy();                              // before unmount; idempotent (2.1.
 
 ### 17. Ignite UI theme ignored, or stuck light (2.3.0)
 ❌ An Ignite UI stylesheet on the page and no add-on: every `--ig-*` token is ignored silently. Or `theme: 'light'` passed on a page with a dark Ignite UI theme: the pinned theme blocks the dark variant.
-✅ `import 'apextree/ignite-ui'` once (free) before the first render, leave `theme` unset, and call `tree.refreshTokens()` after swapping the Ignite UI stylesheet.
+✅ `import 'apextree/ignite-ui'` once (no extra licence key) before the first render, leave `theme` unset, and call `tree.refreshTokens()` after swapping the Ignite UI stylesheet.
 
 ---
 

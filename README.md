@@ -25,7 +25,7 @@ Verified against apextree 2.3.0.
 - **Custom `nodeTemplate`**: receiving the value at `contentKey`, the `context` argument (`direction`, `cardImagePosition`, `expanded`, `lod`)
 - **Lifecycle**: `setLicense()`, construct, `render()`, the returned `Graph`, live `updateData()` diffs, `destroy()`
 - **Graph API**: collapse/expand (single, batch, to-depth, subtree), layout direction (including `'radial'` and `layoutType: 'cluster'`), focus mode, active path / edge flow, expandable cards, search, breadcrumb, selection, exporting
-- **2.x behavior**: spring motion defaults, `maxZoomNodeSpan`, semantic zoom, command palette, count badges, the redesigned expand/collapse button, family `--apx-*` theme tokens and registered theme names, the free Ignite UI add-on and `refreshTokens()` (2.3.0)
+- **2.x behavior**: spring motion defaults, `maxZoomNodeSpan`, semantic zoom, command palette, count badges, the redesigned expand/collapse button, family `--apx-*` theme tokens and registered theme names, the Ignite UI add-on (no extra licence key) and `refreshTokens()` (2.3.0)
 - **Framework wrappers**: `react-apextree`, `vue-apextree`, `ngx-apextree`
 
 ## Installation
