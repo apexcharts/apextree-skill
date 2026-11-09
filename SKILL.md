@@ -16,7 +16,7 @@ description: >
   (`react-apextree`, `vue-apextree`, `ngx-apextree`) over the core API.
 metadata:
   author: ApexCharts
-  version: "1.7.0"
+  version: "1.7.1"
   library_version: "2.3.0"
   category: data-visualization
   tags: [tree, hierarchy, org-chart, diagram, charts, svg, apextree]
